@@ -21,6 +21,11 @@ class ClientService
         // يمكنك وضع أي شروط، فلترة، أو تقسيم صفحات (Pagination) هنا
         // return User::where('role', 'user')->get();
     }
+        function toggleActivate($user)
+    {
+        $user->update(['is_active' => !$user->is_active]);
+        return $user->fresh();
+    }
 public function active(array $data, array $relations = [])
 {
     // استدعاء المودل وجلب البيانات (عدل حسب اسم المودل لديك مثل Client أو User)

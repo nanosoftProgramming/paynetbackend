@@ -31,4 +31,14 @@ class AdminClientsController extends Controller
             return returnMessage(false, $th->getMessage(), null, 'server_error');
         }
     }
+
+        public function toggleActivate(User $user)
+    {
+        try {
+            $user = $this->ClientService->toggleActivate($user);
+            return returnMessage(true, "User updated successfully", new ClientsResource($user));
+        } catch (\Exception $e) {
+            return returnMessage(false, $e->getMessage(), null, 'server_error');
+        }
+    }
 }

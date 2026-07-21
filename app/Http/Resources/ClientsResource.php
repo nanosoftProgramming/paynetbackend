@@ -20,6 +20,8 @@ class ClientsResource extends JsonResource
             'organization_name' => $this->organization_name,
             'email' => $this->email,
             'role' => $this->role,
+            'is_active' => $this->is_active,
+
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
         ];
