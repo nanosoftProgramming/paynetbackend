@@ -23,11 +23,11 @@ class ClientService
     }
 public function toggleActivate($user, array $data = [])
     {
-        // إذا تم إرسال is_active من الـ Frontend استخدمها، وإلا قم بعكس الحالة الحالية
-        $isActive = isset($data['is_active']) ? $data['is_active'] : !$user->is_active;
+        // عكس القيمة الحالية مباشرة لتجنب مشاكل استقبال البيانات الخاطئة
+        $newStatus = $user->is_active == 1 ? 0 : 1;
 
         $user->update([
-            'is_active' => $isActive
+            'is_active' => $newStatus
         ]);
 
         return $user->fresh();
