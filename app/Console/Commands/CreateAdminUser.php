@@ -33,6 +33,7 @@ class CreateAdminUser extends Command
         User::create([
             'username' => $username,
             'organization_name' => $organization,
+            'is_active' => 1, // تفعيل الحساب افتراضياً عند التسجيل
             'email' => $email,
             'password' => Hash::make($password ?: 'password123'),
         ]);
