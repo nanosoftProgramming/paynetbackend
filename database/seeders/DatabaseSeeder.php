@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
+use Illuminate\Support\Facades\Hash; // أضف هذا السطر هنا في الأعلى
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -18,8 +18,12 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-            'name' => 'Test User',
+'username' => 'testuser',
+            'organization_name' => 'Nanosoft',
             'email' => 'test@example.com',
-        ]);
+            'password' => Hash::make('password123'),
+            'created_at' => now(),
+            'updated_at' => now(),
+                    ]);
     }
 }
