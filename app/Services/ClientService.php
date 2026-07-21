@@ -21,9 +21,15 @@ class ClientService
         // يمكنك وضع أي شروط، فلترة، أو تقسيم صفحات (Pagination) هنا
         // return User::where('role', 'user')->get();
     }
-        function toggleActivate($user)
+public function toggleActivate($user, array $data = [])
     {
-        $user->update(['is_active' => !$user->is_active]);
+        // إذا تم إرسال is_active من الـ Frontend استخدمها، وإلا قم بعكس الحالة الحالية
+        $isActive = isset($data['is_active']) ? $data['is_active'] : !$user->is_active;
+
+        $user->update([
+            'is_active' => $isActive
+        ]);
+
         return $user->fresh();
     }
 public function active(array $data, array $relations = [])

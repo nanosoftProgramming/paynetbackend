@@ -32,11 +32,13 @@ class AdminClientsController extends Controller
         }
     }
 
-        public function toggleActivate(User $user)
+public function toggleActivate(Request $request, User $user)
     {
         try {
-            $user = $this->ClientService->toggleActivate($user);
-            return returnMessage(true, "User updated successfully", new ClientsResource($user));
+            // تمرير الـ Request بالكامل للخدمة لالتقاط قيمة is_active المرسلة من الـ Frontend
+            $updatedUser = $this->ClientService->toggleActivate($user, $request->all());
+            
+            return returnMessage(true, "User updated successfully", new ClientsResource($updatedUser));
         } catch (\Exception $e) {
             return returnMessage(false, $e->getMessage(), null, 'server_error');
         }
