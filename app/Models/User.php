@@ -51,4 +51,8 @@ class User extends Authenticatable
             'is_active' => 'integer',
         ];
     }
+    public function wallet()
+{
+    return $this->hasOne(Wallet::class);
+}
 }

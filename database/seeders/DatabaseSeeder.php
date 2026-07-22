@@ -5,25 +5,40 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash; // أضف هذا السطر هنا في الأعلى
+use Illuminate\Support\Facades\Hash;
+
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. استخدام firstOrCreate بالبحث عن البريد أو اسم المستخدم لمنع التكرار
+        User::firstOrCreate(
+            ['email' => 'test@example.com'], // شرط البحث
+            [
+                'username' => 'testuser',
+                'organization_name' => 'Nanosoft',
+                'password' => Hash::make('password123'),
+                'role' => 'user',
+                'is_active' => 1,
+            ]
+        );
 
-        User::factory()->create([
-'username' => 'testuser',
-            'organization_name' => 'Nanosoft',
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
-            'created_at' => now(),
-            'updated_at' => now(),
-                    ]);
+        User::firstOrCreate(
+            ['email' => 'newadmin@nanosoft.technology'], // شرط البحث
+            [
+                'username' => 'new_admin',
+                'organization_name' => 'NanoSoft',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'is_active' => 1,
+            ]
+        );
+
+        // 2. تشغيل seeder المحافظ لتوليدها للعملاء
+        $this->call([
+            WalletSeeder::class,
+        ]);
     }
 }
