@@ -23,9 +23,9 @@ class ClientService
     }
 public function toggleActivate($user, array $data = [])
     {
+
         // عكس القيمة الحالية مباشرة لتجنب مشاكل استقبال البيانات الخاطئة
         $newStatus = $user->is_active == 1 ? 0 : 1;
-
         $user->update([
             'is_active' => $newStatus
         ]);

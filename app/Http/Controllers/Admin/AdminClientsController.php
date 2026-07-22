@@ -31,16 +31,17 @@ class AdminClientsController extends Controller
             return returnMessage(false, $th->getMessage(), null, 'server_error');
         }
     }
+public function toggleActivate(Request $request, $id)
+{
+    try {
+        // البحث عن المستخدم يدوياً لضمان عدم فشل الـ Binding
+        $user = User::findOrFail($id);
 
-public function toggleActivate(Request $request, User $user)
-    {
-        try {
-            // تمرير الـ Request بالكامل للخدمة لالتقاط قيمة is_active المرسلة من الـ Frontend
-            $updatedUser = $this->ClientService->toggleActivate($user, $request->all());
-            
-            return returnMessage(true, "User updated successfully", new ClientsResource($updatedUser));
-        } catch (\Exception $e) {
-            return returnMessage(false, $e->getMessage(), null, 'server_error');
-        }
+        $updatedUser = $this->ClientService->toggleActivate($user, $request->all());
+        
+        return returnMessage(true, "User updated successfully", new ClientsResource($updatedUser));
+    } catch (\Exception $e) {
+        return returnMessage(false, $e->getMessage(), null, 'server_error');
     }
+}
 }

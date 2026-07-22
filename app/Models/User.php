@@ -24,6 +24,7 @@ class User extends Authenticatable
         'organization_name',
         'name',
         'email',
+        'is_active',
         'password',
     ];
 
@@ -47,6 +48,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'integer',
         ];
     }
 }
