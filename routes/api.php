@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\UserTransactionController;
 Route::prefix('v1')->group(function () {
 
     Route::prefix('auth')->group(function () {
