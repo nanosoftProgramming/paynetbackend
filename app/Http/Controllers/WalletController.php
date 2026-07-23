@@ -41,4 +41,38 @@ class WalletController extends Controller
             return returnMessage(false, $th->getMessage(), null, 'server_error');
         }
     }
+    // إنشاء محفظة للمستخدم الحالي إذا لم تكن موجودة
+// إنشاء محفظة للمستخدم الحالي إذا لم تكن موجودة
+    public function createMyWallet(Request $request)
+    {
+        try {
+            $userId = $request->user()->id;
+
+            // التحقق مما إذا كانت المحفظة موجودة مسبقاً
+            $wallet = Wallet::where('user_id', $userId)->first();
+
+            if ($wallet) {
+                return returnMessage(false, 'User already has a wallet', $wallet, 'bad_request');
+            }
+
+            // التحقق من أن رقم الهاتف مرسل إذا كان إجبارياً
+            $request->validate([
+                'phone_number' => 'required|string|max:20',
+            ]);
+
+            // إنشاء المحفظة مع إضافة رقم الهاتف
+            $wallet = Wallet::create([
+                'user_id' => $userId,
+                'phone_number' => $request->phone_number,
+                'total_price' => $request->total_price,
+                'balance' => 0.00,
+                'status' => 1,
+            ]);
+
+            return returnMessage(true, 'Wallet created successfully', $wallet, 'success');
+
+        } catch (\Throwable $th) {
+            return returnMessage(false, $th->getMessage(), null, 'server_error');
+        }
+    }
 }
