@@ -13,4 +13,5 @@ Route::get('/currencies', [CurrencyController::class, 'index']);
 Route::post('/currencies/update', [CurrencyController::class, 'updateRates']);
 Route::post('/admin/wallets/{id}/status', [WalletController::class, 'changeWalletStatus']);
 Route::post('/admin/transactions', [AdminTransactionController::class, 'store']);
+Route::get('/admin/transactions', [AdminTransactionController::class, 'index']); // جلب كل المعاملات
 });

@@ -44,4 +44,17 @@ public function store(Request $request)
             'data'    => $transaction
         ], 201);
     }
+    public function index(Request $request)
+    {
+        // جلب المعاملات مع بيانات المستخدم والمحفظة المرتبطة بها، وترتيبها من الأحدث للأقدم
+        $transactions = Transaction::with(['user', 'wallet'])
+            ->latest()
+            ->paginate(15); // استخدام التصفح (Pagination) لتقسيم النتائج إلى صفحات
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Transactions retrieved successfully.',
+            'data' => $transactions
+        ], 200);
+    }
 }
