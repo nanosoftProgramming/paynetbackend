@@ -32,7 +32,7 @@ class WalletController extends Controller
             $wallet = Wallet::where('user_id', $request->user()->id)->with('user')->first();
 
             if (!$wallet) {
-                return returnMessage(false, 'Wallet not found for this user', null, 'not_found');
+                return returnMessage(false, 'Wallet not found for this user', [], 'not_found');
             }
 
             return returnMessage(true, 'Wallet retrieved successfully', $wallet, 'success');
