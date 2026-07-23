@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\WalletController;
 Route::prefix('v1')->group(function () {
 
     Route::prefix('auth')->group(function () {
@@ -11,7 +11,9 @@ Route::prefix('v1')->group(function () {
             Route::post('register', [AuthController::class, 'register']);
             Route::post('login', [AuthController::class, 'login']);
         });
-
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/user/wallet', [WalletController::class, 'myWallet']);
+});
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('me', [AuthController::class, 'me']);
             Route::post('logout', [AuthController::class, 'logout']);

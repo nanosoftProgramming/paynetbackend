@@ -24,4 +24,21 @@ class WalletController extends Controller
             return returnMessage(false, $th->getMessage(), null, 'server_error');
         }
     }
+    // جلب محفظة المستخدم المُسجّل حالياً
+    public function myWallet(Request $request)
+    {
+        try {
+            // جلب المحفظة المرتبطة بالمستخدم الحالي مع بياناته
+            $wallet = Wallet::where('user_id', $request->user()->id)->with('user')->first();
+
+            if (!$wallet) {
+                return returnMessage(false, 'Wallet not found for this user', null, 'not_found');
+            }
+
+            return returnMessage(true, 'Wallet retrieved successfully', $wallet, 'success');
+
+        } catch (\Throwable $th) {
+            return returnMessage(false, $th->getMessage(), null, 'server_error');
+        }
+    }
 }
