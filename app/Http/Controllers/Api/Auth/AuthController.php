@@ -27,6 +27,7 @@ class AuthController extends Controller
         $user = User::create([
             'username' => $validated['username'],
             'email' => $validated['email'],
+'role' => $validated['role'] ?? 'user', // إذا كان مرسلاً من الطلب، وإلا اجعله افتراضياً 'user'
             'is_active' => 1, // تفعيل الحساب افتراضياً عند التسجيل
             'organization_name' => $validated['organization_name'],
             'password' => Hash::make($validated['password']),
