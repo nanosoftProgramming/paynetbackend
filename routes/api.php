@@ -17,7 +17,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/transactions', [UserTransactionController::class, 'myTransactions']);
     Route::post('/user/wallet/create', [WalletController::class, 'createMyWallet']);
                 Route::post('/admin/users/{id}/ip', [AuthController::class, 'updateOrCreateUserIp']);
-
+Route::post('/my-transactions/{id}/respond', [UserTransactionController::class, 'updateTransactionStatus']);
 });
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('me', [AuthController::class, 'me']);
