@@ -23,6 +23,7 @@ class User extends Authenticatable
         'username',
         'organization_name',
         'name',
+        'ip', // <-- أضف الحقل هنا
         'email',
         'is_active',
         'password',

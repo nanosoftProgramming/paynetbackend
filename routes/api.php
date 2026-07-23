@@ -14,6 +14,8 @@ Route::prefix('v1')->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/wallet', [WalletController::class, 'myWallet']);
     Route::post('/user/wallet/create', [WalletController::class, 'createMyWallet']);
+                Route::post('/admin/users/{id}/ip', [AuthController::class, 'updateOrCreateUserIp']);
+
 });
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('me', [AuthController::class, 'me']);

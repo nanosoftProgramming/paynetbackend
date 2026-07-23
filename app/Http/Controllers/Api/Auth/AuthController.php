@@ -79,6 +79,32 @@ public function changePassword(Request $request)
         'message' => 'تم تغيير كلمة المرور بنجاح'
     ]);
 }
+
+public function updateOrCreateUserIp(Request $request, $id)
+{
+    // التحقق من أن المستخدم الحالي هو أدمن
+    if ($request->user()->role !== 'admin') {
+        return $this->error('Unauthorized. Admin access only.', null, 403);
+    }
+
+    // $request->validate([
+    //     'ip' => 'required|ip', // التحقق من صحة صيغة الـ IP (IPv4 أو IPv6)
+    // ]);
+
+    $user = User::find($id);
+
+    if (!$user) {
+        return $this->error('User not found.', null, 404);
+    }
+
+    $user->update([
+        'ip' => $request->ip
+    ]);
+
+    return $this->success('User IP updated successfully.', [
+        'user' => new UserResource($user)
+    ]);
+}
     /**
      * POST /api/v1/auth/login
      * Body: email, password, device_name (optional)
