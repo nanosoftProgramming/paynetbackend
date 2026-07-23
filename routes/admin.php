@@ -11,5 +11,5 @@ Route::post('/admin/clients/{user}/toggle-activate', [AdminClientsController::cl
     Route::get('/admin/wallets', [WalletController::class, 'index']);
 Route::get('/currencies', [CurrencyController::class, 'index']);
 Route::post('/currencies/update', [CurrencyController::class, 'updateRates']);
-
+Route::post('/admin/wallets/{id}/status', [WalletController::class, 'changeWalletStatus']);
 });

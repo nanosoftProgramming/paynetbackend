@@ -41,8 +41,6 @@ class WalletController extends Controller
             return returnMessage(false, $th->getMessage(), null, 'server_error');
         }
     }
-    // إنشاء محفظة للمستخدم الحالي إذا لم تكن موجودة
-// إنشاء محفظة للمستخدم الحالي إذا لم تكن موجودة
     public function createMyWallet(Request $request)
     {
         try {
@@ -70,6 +68,37 @@ class WalletController extends Controller
             ]);
 
             return returnMessage(true, 'Wallet created successfully', $wallet, 'success');
+
+        } catch (\Throwable $th) {
+            return returnMessage(false, $th->getMessage(), null, 'server_error');
+        }
+    }
+
+
+    public function changeWalletStatus(Request $request, $id)
+    {
+        try {
+            // التحقق من أن المستخدم أدمن
+            if ($request->user()->role !== 'admin') {
+                return returnMessage(false, 'Unauthorized. Admin access only.', null, 'forbidden');
+            }
+
+            // التحقق من إرسال الحالة المطلوبة (accepted أو rejected)
+            $request->validate([
+                'status' => 'required|in:accepted,rejected,active,inactive', // حدد الحالات المعتمدة لديك
+            ]);
+
+            $wallet = Wallet::find($id);
+
+            if (!$wallet) {
+                return returnMessage(false, 'Wallet not found', null, 'not_found');
+            }
+
+            // تحديث حالة المحفظة
+            $wallet->status = $request->status;
+            $wallet->save();
+
+            return returnMessage(true, 'Wallet status updated successfully', $wallet, 'success');
 
         } catch (\Throwable $th) {
             return returnMessage(false, $th->getMessage(), null, 'server_error');
