@@ -103,7 +103,7 @@ class WalletController extends Controller
             // إذا وافق الأدمن (تأكد من القيمة التي تعبر عن الموافقة مثل accepted أو 1)
             if ($request->status == 'accepted' || $request->status == '1') {
                 $wallet->amount = $request->amount;
-                $wallet->total_price = $request->price; // أو العمود الخاص بالسعر في الجدول لدك
+                $wallet->price = $request->price; // أو العمود الخاص بالسعر في الجدول لدك
                 
                 // يمكنك أيضاً زيادة رصيد المحفظة مباشرة إذا رغبت:
                 // $wallet->balance += $request->amount;
