@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -39,7 +40,45 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
         ], 201);
     }
+// تعديل الملف الشخصي
+public function updateProfile(Request $request)
+{
+    $user = $request->user();
 
+    $validated = $request->validate([
+        'username' => 'sometimes|string|max:255',
+        'email' => 'sometimes|email|unique:users,email,' . $user->id,
+'organization_name' => 'sometimes|string|max:255',
+        ]);
+
+    $user->update($validated);
+
+    return response()->json([
+        'status' => true,
+        'message' => 'تم تحديث الملف الشخصي بنجاح',
+        'data' => $user
+    ]);
+}
+
+// تغيير كلمة المرور
+public function changePassword(Request $request)
+{
+    $request->validate([
+        'current_password' => 'required|current_password',
+        'new_password' => 'required|string|min:8|confirmed', // يتطلب حقل new_password_confirmation
+    ]);
+
+    $user = $request->user();
+    
+    $user->update([
+        'password' => Hash::make($request->new_password)
+    ]);
+
+    return response()->json([
+        'status' => true,
+        'message' => 'تم تغيير كلمة المرور بنجاح'
+    ]);
+}
     /**
      * POST /api/v1/auth/login
      * Body: email, password, device_name (optional)
