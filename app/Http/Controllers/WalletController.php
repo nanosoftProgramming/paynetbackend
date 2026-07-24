@@ -97,7 +97,7 @@ public function createMyWallet(Request $request)
             $request->validate([
                 'status' => 'required|in:accepted,rejected,active,inactive,1,0', 
                 'amount' => 'required_if:status,accepted,1|numeric|min:0',
-                'price'  => 'required_if:status,accepted,1|numeric|min:0',
+                // 'price'  => 'required_if:status,accepted,1|numeric|min:0',
             ]);
 
             // تحديث الحالة
@@ -106,10 +106,8 @@ public function createMyWallet(Request $request)
             // إذا وافق الأدمن (تأكد من القيمة التي تعبر عن الموافقة مثل accepted أو 1)
             if ($request->status == 'accepted' || $request->status == '1') {
                 $wallet->amount = $request->amount;
-                $wallet->price = $request->price; // أو العمود الخاص بالسعر في الجدول لدك
-                
-                // يمكنك أيضاً زيادة رصيد المحفظة مباشرة إذا رغبت:
-                // $wallet->balance += $request->amount;
+                $totalPrice = $wallet->total_price ?? 0;
+$wallet->price = $totalPrice - $request->amount;                
             }
 
             $wallet->save();
