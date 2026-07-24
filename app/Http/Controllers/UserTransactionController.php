@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Models\Wallet;
+use Illuminate\Support\Facades\DB; // <-- أضف هذا السطر الضروري جداً
 use Illuminate\Http\Request;
 class UserTransactionController extends Controller
 {
