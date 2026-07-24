@@ -41,7 +41,7 @@ class WalletController extends Controller
             return returnMessage(false, $th->getMessage(), null, 'server_error');
         }
     }
-    public function createMyWallet(Request $request)
+public function createMyWallet(Request $request)
     {
         try {
             $userId = $request->user()->id;
@@ -53,18 +53,21 @@ class WalletController extends Controller
                 return returnMessage(false, 'User already has a wallet', $wallet, 'bad_request');
             }
 
-            // التحقق من أن رقم الهاتف مرسل إذا كان إجبارياً
+            // التحقق من صحة البيانات واستقبال العملة كنص
             $request->validate([
                 'phone_number' => 'required|string|max:20',
+                'currency'     => 'required|string|max:50', // التحقق من أن العملة نصية وموجودة
+                'total_price'  => 'nullable|numeric',
             ]);
 
-            // إنشاء المحفظة مع إضافة رقم الهاتف
+            // إنشاء المحفظة مع حفظ العملة كنص في البداية
             $wallet = Wallet::create([
-                'user_id' => $userId,
+                'currency'     => $request->currency, // <--- حفظ اسم العملة كنص (مثال: USD أو EGP)
+                'user_id'      => $userId,
                 'phone_number' => $request->phone_number,
-                'total_price' => $request->total_price,
-                'balance' => 0.00,
-                'status' => 1,
+                'total_price'  => $request->total_price ?? 0.00,
+                'balance'      => 0.00,
+                'status'       => 1,
             ]);
 
             return returnMessage(true, 'Wallet created successfully', $wallet, 'success');

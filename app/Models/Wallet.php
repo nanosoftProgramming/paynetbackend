@@ -16,6 +16,7 @@ class Wallet extends Model
         'amount',
         'price',
         'status',
+        'currency', 
     ];
 
     // علاقة أن المحفظة تنتمي لمستخدم واحد
