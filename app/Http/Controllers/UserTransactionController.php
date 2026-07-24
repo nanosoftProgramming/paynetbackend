@@ -77,11 +77,11 @@ public function myTransactions(Request $request)
                         'message' => 'رصيد المحفظة غير كافٍ لإتمام عملية الخصم.'
                     ], 422);
                 }
-                $wallet->price -= $transaction->price;
+                $wallet->price += $transaction->price;
 
             } elseif ($transaction->type == 2) {
                 // Type == 2: إضافة سعر المعاملة إلى رصيد المحفظة (Add)
-                $wallet->price += $transaction->price;
+                $wallet->price -= $transaction->price;
             }
 
             // حفظ التعديل على المحفظة وتغيير حالة المعاملة إلى accepted
