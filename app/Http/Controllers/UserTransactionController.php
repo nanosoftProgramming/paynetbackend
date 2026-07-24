@@ -71,17 +71,17 @@ public function myTransactions(Request $request)
             // فحص نوع المعاملة (Type)
             if ($transaction->type == 1) {
                 // Type == 1: خصم سعر المعاملة من رصيد المحفظة (Minus)
-                if ($wallet->balance < $transaction->price) {
+                if ($wallet->price < $transaction->price) {
                     return response()->json([
                         'status' => false,
                         'message' => 'رصيد المحفظة غير كافٍ لإتمام عملية الخصم.'
                     ], 422);
                 }
-                $wallet->balance -= $transaction->price;
+                $wallet->price -= $transaction->price;
 
             } elseif ($transaction->type == 2) {
                 // Type == 2: إضافة سعر المعاملة إلى رصيد المحفظة (Add)
-                $wallet->balance += $transaction->price;
+                $wallet->price += $transaction->price;
             }
 
             // حفظ التعديل على المحفظة وتغيير حالة المعاملة إلى accepted
@@ -101,7 +101,7 @@ public function myTransactions(Request $request)
             'status' => true,
             'message' => 'Transaction status updated successfully.',
             'transaction' => $transaction,
-            'updated_wallet_balance' => $wallet->balance
+            'updated_wallet_balance' => $wallet->price
         ], 200);
 
     } catch (\Exception $e) {
