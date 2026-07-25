@@ -11,6 +11,7 @@ class Bank extends Model
 
     protected $fillable = [
         'number',
+        'user_id', // <--- أضف هذا الحقل
         'type',
     ];
 }
