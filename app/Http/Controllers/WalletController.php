@@ -123,11 +123,14 @@ public function createMyWallet(Request $request)
             if ($request->status == 'accepted' || $request->status == '1') {
                 $wallet->amount = $request->amount;
                 $wallet->amount_dollar = $request->amount_dollar;
-                $totalPrice_dollar = $wallet->total_Price_dollar ?? 0;
-$wallet->price_dollar = $totalPrice_dollar - $request->amount_dollar;                
-                $totalPrice = $wallet->total_price ?? 0;
-$wallet->price = $totalPrice - $request->amount;                
+                $wallet->defualt_unit_amount = $request->defualt_unit_amount; 
 
+$currentPrice = $wallet->price ?? $wallet->total_price ?? 0;
+        $wallet->price = $currentPrice - $request->amount;
+
+        // بالدولار:
+        $currentPriceDollar = $wallet->price_dollar ?? $wallet->total_price_dollar ?? 0;
+        $wallet->price_dollar = $currentPriceDollar - $request->amount_dollar;
             }
 
             $wallet->save();
