@@ -125,9 +125,7 @@ public function createMyWallet(Request $request)
                 $wallet->amount_dollar = $request->amount_dollar;
                 $wallet->defualt_unit_amount = $request->defualt_unit_amount; 
 
-$currentPrice = $wallet->price ?? $wallet->total_price ?? 0;
-        $wallet->price = $currentPrice - $request->amount;
-
+$wallet->price = ($wallet->total_price ?? 0) - $request->amount;
         // بالدولار:
         $currentPriceDollar = $wallet->price_dollar ?? $wallet->total_price_dollar ?? 0;
         $wallet->price_dollar = $currentPriceDollar - $request->amount_dollar;
