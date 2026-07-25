@@ -14,4 +14,8 @@ class Bank extends Model
         'user_id', // <--- أضف هذا الحقل
         'type',
     ];
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
