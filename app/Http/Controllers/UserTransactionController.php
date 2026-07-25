@@ -14,7 +14,7 @@ public function myTransactions(Request $request)
         $userId = $request->user()->id; // أو استخدام auth()->id()
 
         // 2. جلب المعاملات الخاصة بهذا المستخدم فقط مع بيانات المحفظة
-        $transactions = Transaction::with(['wallet'])
+        $transactions = Transaction::with(['wallet', 'bank'])
             ->where('user_id', $userId)
             ->latest()
             ->get();
