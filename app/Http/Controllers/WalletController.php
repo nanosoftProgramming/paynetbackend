@@ -112,7 +112,7 @@ public function createMyWallet(Request $request)
                 'status' => 'required|in:accepted,rejected,active,inactive,1,0', 
                 'amount' => 'required_if:status,accepted,1|numeric|min:0',
                 'amount_dollar' => 'required_if:status,accepted,1|numeric|min:0',
-                'defualt_unit_amount' => 'required_if:status,accepted,1|numeric|min:0',
+                'defualt_unit_amount' => 'required_if:status,accepted,1|string|min:0',
                 // 'price'  => 'required_if:status,accepted,1|numeric|min:0',
             ]);
 
