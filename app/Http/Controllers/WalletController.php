@@ -112,6 +112,7 @@ public function createMyWallet(Request $request)
                 'status' => 'required|in:accepted,rejected,active,inactive,1,0', 
                 'amount' => 'required_if:status,accepted,1|numeric|min:0',
                 'amount_dollar' => 'required_if:status,accepted,1|numeric|min:0',
+                'defualt_unit_amount' => 'required_if:status,accepted,1|numeric|min:0',
                 // 'price'  => 'required_if:status,accepted,1|numeric|min:0',
             ]);
 
@@ -121,8 +122,12 @@ public function createMyWallet(Request $request)
             // إذا وافق الأدمن (تأكد من القيمة التي تعبر عن الموافقة مثل accepted أو 1)
             if ($request->status == 'accepted' || $request->status == '1') {
                 $wallet->amount = $request->amount;
+                $wallet->amount_dollar = $request->amount_dollar;
+                $totalPrice_dollar = $wallet->totalPrice_dollar ?? 0;
+$wallet->price_dollar = $totalPrice_dollar - $request->amount_dollar;                
                 $totalPrice = $wallet->total_price ?? 0;
 $wallet->price = $totalPrice - $request->amount;                
+
             }
 
             $wallet->save();
