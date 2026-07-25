@@ -58,6 +58,12 @@ public function createMyWallet(Request $request)
                 'phone_number' => 'required|string|max:20',
                 'currency'     => 'required|string|max:50', // التحقق من أن العملة نصية وموجودة
                 'total_price'  => 'nullable|numeric',
+                // 'defualt_unit'             => ['nullable', 'string', 'max:255'],
+                // 'price_dollar'             => ['nullable', 'numeric', 'min:0'],
+                // 'total_price_dollar'       => ['nullable', 'numeric', 'min:0'],
+                // 'defualt_unit_total_price' => ['nullable', 'numeric', 'min:0'],
+                // 'amount_dollar'            => ['nullable', 'numeric', 'min:0'],
+                // 'defualt_unit_amount'      => ['nullable', 'numeric', 'min:0'],
             ]);
 
             // إنشاء المحفظة مع حفظ العملة كنص في البداية
@@ -68,6 +74,12 @@ public function createMyWallet(Request $request)
                 'total_price'  => $request->total_price ?? 0.00,
                 'balance'      => 0.00,
                 'status'       => 1,
+                // 'defualt_unit'             => $validated['defualt_unit'] ?? null,
+                // 'price_dollar'             => $validated['price_dollar'] ?? null,
+                // 'total_price_dollar'       => $validated['total_price_dollar'] ?? null,
+                // 'defualt_unit_total_price' => $validated['defualt_unit_total_price'] ?? null,
+                // 'amount_dollar'            => $validated['amount_dollar'] ?? null,
+                // 'defualt_unit_amount'      => $validated['defualt_unit_amount'] ?? null,
             ]);
 
             return returnMessage(true, 'Wallet created successfully', $wallet, 'success');

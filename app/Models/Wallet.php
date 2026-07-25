@@ -14,6 +14,12 @@ class Wallet extends Model
         'phone_number',
         'total_price',
         'amount',
+        'defualt_unit',
+        'price_dollar',
+        'total_price_dollar',       // <--- أضف هذا الحقل
+    'defualt_unit_total_price', // <--- أضف هذا الحقل
+    'amount_dollar',            // <--- أضف هذا الحقل
+    'defualt_unit_amount',      // <--- أضف هذا الحقل
         'price',
         'status',
         'currency', 
