@@ -19,7 +19,7 @@ Route::get('/admin/transactions', [AdminTransactionController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/client/banks', [BankController::class, 'getClientBanks']);
     Route::post('/client/bank/add', [BankController::class, 'store']);
-    Route::put('/client/bank/update/{id}', [BankController::class, 'update']);
+    Route::post('/client/bank/update/{id}', [BankController::class, 'update']);
     Route::delete('/client/bank/delete/{id}', [BankController::class, 'destroy']);
 
     // مسارات الأدمن (يمكنك إضافة ميدلوير التحقق من الصلاحيات لاحقاً)
