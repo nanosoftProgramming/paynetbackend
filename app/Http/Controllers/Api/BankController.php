@@ -22,7 +22,7 @@ class BankController extends Controller
     }
 
     // 2. إضافة بنك جديد للعميل
-    public function store(Request $request)
+public function store(Request $request)
     {
         try {
             $request->validate([
@@ -31,7 +31,7 @@ class BankController extends Controller
             ]);
 
             $bank = Bank::create([
-                'user_id' => $request->user()->id, // حفظ معرف المستخدم إذا كان الجدول يربطه
+                'user_id' => $request->user()->id, // أخذ الـ user_id من الـ Token تلقائياً
                 'number'  => $request->number,
                 'type'    => $request->type,
             ]);
