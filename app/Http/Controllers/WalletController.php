@@ -78,8 +78,8 @@ public function createMyWallet(Request $request)
                 'status'       => 1,
                 // 'defualt_unit'             => $validated['defualt_unit'] ?? null,
                 // 'price_dollar'             => $validated['price_dollar'] ?? null,
-                'total_price_dollar'       => $validated['total_price_dollar'] ?? null,
-                'defualt_unit_total_price' => $validated['defualt_unit_total_price'] ?? null,
+                'total_price_dollar'       => $request->total_price_dollar ?? null,
+                'defualt_unit_total_price' => $request->defualt_unit_total_price ?? null,
                 // 'amount_dollar'            => $validated['amount_dollar'] ?? null,
                 // 'defualt_unit_amount'      => $validated['defualt_unit_amount'] ?? null,
             ]);
