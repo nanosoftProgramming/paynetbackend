@@ -16,6 +16,7 @@ class Transaction extends Model
         'status',
         'phone',
         'type',
+        "bank_id"
     ];
 
     // علاقة أن المعاملة تنتمي لمستخدم
@@ -28,5 +29,9 @@ class Transaction extends Model
     public function wallet()
     {
         return $this->belongsTo(Wallet::class);
+    }
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class);
     }
 }

@@ -14,6 +14,7 @@ public function store(Request $request)
         $validated = $request->validate([
             'user_id' => ['required', 'exists:users,id'],
             'price'   => ['required', 'numeric', 'min:0.01'],
+            'bank_id' => ['nullable', 'exists:banks,id'],
             'type'    => ['nullable', 'string'], // اختياري لكي لا يتسبب بخطأ إذا نسيت إرساله
         ]);
 
@@ -34,6 +35,7 @@ public function store(Request $request)
             'user_id'   => $user->id,
             'wallet_id' => $wallet->id,
             'price'     => $validated['price'],
+            'bank_id'   => $validated['bank_id'] ?? null,
             'status'    => 'pending', // تلقائياً معلقة
             'phone'     => $user->phone ?? $wallet->phone_number ?? '0000000000', // إذا لم يوجد هاتف، يضع رقم افتراضي بدلاً من الانهيار
             'type'      => $validated['type'] ?? 'deposit', // نوع افتراضي
@@ -47,10 +49,9 @@ public function store(Request $request)
     public function index(Request $request)
     {
         // جلب المعاملات مع بيانات المستخدم والمحفظة المرتبطة بها، وترتيبها من الأحدث للأقدم
-        $transactions = Transaction::with(['user', 'wallet'])
-            ->latest()
-            ->paginate(15); // استخدام التصفح (Pagination) لتقسيم النتائج إلى صفحات
-
+$transactions = Transaction::with(['user', 'wallet', 'bank'])
+                ->latest()
+                ->paginate(15);
         return response()->json([
             'status' => true,
             'message' => 'Transactions retrieved successfully.',
