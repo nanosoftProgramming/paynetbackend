@@ -9,11 +9,11 @@ use Illuminate\Http\Request;
 class BankController extends Controller
 {
     // 1. جلب كافة البنوك الخاصة بالعميل الحالي
-    public function getClientBanks(Request $request)
+  public function getClientBanks(Request $request)
     {
         try {
-            $userId = $request->user()->id;
-            $banks = Bank::where('user_id', $userId)->get(); // مفترض وجود user_id في جدول البنوك أو ربط عبر علاقة
+            $userId = $request->user()->id; // جلب الـ ID من الـ Token مباشرة
+            $banks = Bank::where('user_id', $userId)->get();
 
             return returnMessage(true, 'Client banks fetched successfully', $banks, 'success');
         } catch (\Throwable $th) {
