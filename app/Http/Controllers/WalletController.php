@@ -59,7 +59,7 @@ public function createMyWallet(Request $request)
                 'currency'     => 'required|string|max:50', // التحقق من أن العملة نصية وموجودة
                 'total_price'  => 'nullable|numeric',
                 'total_price_dollar'  => 'nullable|numeric',
-                                'defualt_unit_total_price' => ['nullable', 'numeric', 'min:0'],
+                                'defualt_unit_total_price' => ['nullable', 'string', 'max:20'],
 
                 // 'defualt_unit'             => ['nullable', 'string', 'max:255'],
                 // 'price_dollar'             => ['nullable', 'numeric', 'min:0'],
