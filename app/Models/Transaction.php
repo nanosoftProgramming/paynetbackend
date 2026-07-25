@@ -16,7 +16,9 @@ class Transaction extends Model
         'status',
         'phone',
         'type',
-        "bank_id"
+        "bank_id",
+        'defualt_unit', // <--- أضف هذا الحقل
+    'price_dollar', // <--- أضف هذا الحقل
     ];
 
     // علاقة أن المعاملة تنتمي لمستخدم
