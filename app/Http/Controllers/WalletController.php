@@ -123,7 +123,7 @@ public function createMyWallet(Request $request)
             if ($request->status == 'accepted' || $request->status == '1') {
                 $wallet->amount = $request->amount;
                 $wallet->amount_dollar = $request->amount_dollar;
-                $totalPrice_dollar = $wallet->totalPrice_dollar ?? 0;
+                $totalPrice_dollar = $wallet->total_Price_dollar ?? 0;
 $wallet->price_dollar = $totalPrice_dollar - $request->amount_dollar;                
                 $totalPrice = $wallet->total_price ?? 0;
 $wallet->price = $totalPrice - $request->amount;                
