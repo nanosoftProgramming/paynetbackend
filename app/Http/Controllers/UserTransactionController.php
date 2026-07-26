@@ -78,10 +78,12 @@ public function myTransactions(Request $request)
                     ], 422);
                 }
                 $wallet->price += $transaction->price;
+                $wallet->price_dollar += $transaction->price_dollar;
 
             } elseif ($transaction->type == 2) {
                 // Type == 2: إضافة سعر المعاملة إلى رصيد المحفظة (Add)
                 $wallet->price -= $transaction->price;
+                $wallet->price_dollar -= $transaction->price_dollar;
             }
 
             // حفظ التعديل على المحفظة وتغيير حالة المعاملة إلى accepted
