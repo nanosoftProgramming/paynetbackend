@@ -17,6 +17,7 @@ class Transaction extends Model
         'phone',
         'type',
         "bank_id",
+        'phone_number',
         'defualt_unit', // <--- أضف هذا الحقل
     'price_dollar', // <--- أضف هذا الحقل
     ];

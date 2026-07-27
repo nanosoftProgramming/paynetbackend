@@ -93,6 +93,61 @@ public function createMyWallet(Request $request)
 
 
 // قبول أو رفض محفظة المستخدم بواسطة الأدمن مع إضافة المبلغ والسعر عند القبول
+public function updateWallet(Request $request, $id)
+    {
+        try {
+            // التحقق من أن المستخدم أدمن
+            if ($request->user()->role !== 'admin') {
+                return returnMessage(false, 'Unauthorized. Admin access only.', null, 'forbidden');
+            }
+
+            $wallet = Wallet::find($id);
+
+            if (!$wallet) {
+                return returnMessage(false, 'Wallet not found', null, 'not_found');
+            }
+
+            // التحقق من صحة البيانات الواردة
+            $request->validate([
+                'amount'              => 'required_if:status,accepted,1|nullable|numeric|min:0',
+                'amount_dollar'       => 'required_if:status,accepted,1|nullable|numeric|min:0',
+                'defualt_unit_amount' => 'required_if:status,accepted,1|nullable|string|max:50',
+                'price'               => 'nullable|numeric|min:0',
+                'price_dollar'        => 'nullable|numeric|min:0',
+                'defualt_unit' => 'required_if:status,accepted,1|nullable|string|max:50',
+
+            ]);
+
+
+            // تحديث الحقول بالقيم المرسلة مباشرة بدون حسابات
+            if ($request->has('amount')) {
+                $wallet->amount = $request->amount;
+            }
+            if ($request->has('amount_dollar')) {
+                $wallet->amount_dollar = $request->amount_dollar;
+            }
+            if ($request->has('defualt_unit_amount')) {
+                $wallet->defualt_unit_amount = $request->defualt_unit_amount;
+        
+            if ($request->has('price')) {
+                $wallet->price = $request->price;
+            }
+            if ($request->has('price_dollar')) {
+                $wallet->price_dollar = $request->price_dollar;
+            }
+
+                }
+            if ($request->has('defualt_unit')) {
+                $wallet->defualt_unit = $request->defualt_unit;
+            }
+            $wallet->save();
+
+            return returnMessage(true, 'Wallet updated successfully', $wallet, 'success');
+
+        } catch (\Throwable $th) {
+            return returnMessage(false, $th->getMessage(), null, 'server_error');
+        }
+    }
     public function changeWalletStatus(Request $request, $id)
     {
         try {
@@ -107,33 +162,43 @@ public function createMyWallet(Request $request)
                 return returnMessage(false, 'Wallet not found', null, 'not_found');
             }
 
-            // التحقق من البيانات المرسلة
+            // التحقق من صحة البيانات الواردة
             $request->validate([
-                'status' => 'required|in:accepted,rejected,active,inactive,1,0', 
-                'amount' => 'required_if:status,accepted,1|numeric|min:0',
-                'amount_dollar' => 'required_if:status,accepted,1|numeric|min:0',
-                'defualt_unit_amount' => 'required_if:status,accepted,1|string|min:0',
-                // 'price'  => 'required_if:status,accepted,1|numeric|min:0',
+                'status'              => 'required|in:accepted,rejected,active,inactive,1,0', 
+                'amount'              => 'required_if:status,accepted,1|nullable|numeric|min:0',
+                'amount_dollar'       => 'required_if:status,accepted,1|nullable|numeric|min:0',
+                'defualt_unit_amount' => 'required_if:status,accepted,1|nullable|string|max:50',
+                'defualt_amount'      => 'nullable|string|max:50',
+                'price'               => 'nullable|numeric|min:0',
+                'price_dollar'        => 'nullable|numeric|min:0',
             ]);
 
             // تحديث الحالة
             $wallet->status = $request->status;
 
-            // إذا وافق الأدمن (تأكد من القيمة التي تعبر عن الموافقة مثل accepted أو 1)
-            if ($request->status == 'accepted' || $request->status == '1') {
+            // تحديث الحقول بالقيم المرسلة مباشرة بدون حسابات
+            if ($request->has('amount')) {
                 $wallet->amount = $request->amount;
+            }
+            if ($request->has('amount_dollar')) {
                 $wallet->amount_dollar = $request->amount_dollar;
-                $wallet->defualt_unit_amount = $request->defualt_unit_amount; 
-
-$wallet->price = ($wallet->total_price ?? 0) - $request->amount;
-        // بالدولار:
-        $currentPriceDollar = $wallet->price_dollar ?? $wallet->total_price_dollar ?? 0;
-        $wallet->price_dollar = $currentPriceDollar - $request->amount_dollar;
+            }
+            if ($request->has('defualt_unit_amount')) {
+                $wallet->defualt_unit_amount = $request->defualt_unit_amount;
+            }
+            if ($request->has('defualt_amount')) {
+                $wallet->defualt_amount = $request->defualt_amount;
+            }
+            if ($request->has('price')) {
+                $wallet->price = $request->price;
+            }
+            if ($request->has('price_dollar')) {
+                $wallet->price_dollar = $request->price_dollar;
             }
 
             $wallet->save();
 
-            return returnMessage(true, 'Wallet updated and processed successfully', $wallet, 'success');
+            return returnMessage(true, 'Wallet updated successfully', $wallet, 'success');
 
         } catch (\Throwable $th) {
             return returnMessage(false, $th->getMessage(), null, 'server_error');

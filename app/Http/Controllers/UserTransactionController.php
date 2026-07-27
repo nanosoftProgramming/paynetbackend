@@ -64,28 +64,45 @@ public function myTransactions(Request $request)
                 'message' => 'محفظة المستخدم غير موجودة.'
             ], 404);
         }
+        $walletPrice = (float) $wallet->price;
 
+            $walletPriceDollar = (float) $wallet->price_dollar;
+
+           
+
+            $transactionPrice = (float) $transaction->price;
+
+            $transactionPriceDollar = (float) $transaction->price_dollar;
         // إذا اختار المستخدم ACCEPTED
         if ($validated['status'] === 'accepted') {
             
             // فحص نوع المعاملة (Type)
-            if ($transaction->type == 1) {
-                // Type == 1: خصم سعر المعاملة من رصيد المحفظة (Minus)
-                if ($wallet->price < $transaction->price) {
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'رصيد المحفظة غير كافٍ لإتمام عملية الخصم.'
-                    ], 422);
-                }
-                $wallet->price += $transaction->price;
-                $wallet->price_dollar += $transaction->price_dollar;
+            // if ($transaction->type == 1) {
+            //     // Type == 1: خصم سعر المعاملة من رصيد المحفظة (Minus)
+            //     // if ($wallet->price < $transaction->price) {
+            //     //     return response()->json([
+            //     //         'status' => false,
+            //     //         'message' => 'رصيد المحفظة غير كافٍ لإتمام عملية الخصم.'
+            //     //     ], 422);
+            //     // }
+            //     $wallet->price += $transaction->price;
+            //     $wallet->price_dollar += $transaction->price_dollar;
+
+            // } elseif ($transaction->type == 2) {
+            //     // Type == 2: إضافة سعر المعاملة إلى رصيد المحفظة (Add)
+            //     $wallet->price -= $transaction->price;
+            //     $wallet->price_dollar -= $transaction->price_dollar;
+            // }
+if ($transaction->type == 1) {
+                // Type == 1: عملية سحب أو خصم (نطرح من رصيد المحفظة)
+                $wallet->price = $walletPrice - $transactionPrice;
+                $wallet->price_dollar = $walletPriceDollar - $transactionPriceDollar;
 
             } elseif ($transaction->type == 2) {
-                // Type == 2: إضافة سعر المعاملة إلى رصيد المحفظة (Add)
-                $wallet->price -= $transaction->price;
-                $wallet->price_dollar -= $transaction->price_dollar;
+                // Type == 2: عملية إيداع أو إضافة (نجمع على رصيد المحفظة)
+                $wallet->price = $walletPrice + $transactionPrice;
+                $wallet->price_dollar = $walletPriceDollar + $transactionPriceDollar;
             }
-
             // حفظ التعديل على المحفظة وتغيير حالة المعاملة إلى accepted
             $wallet->save();
             $transaction->status = 'accepted';

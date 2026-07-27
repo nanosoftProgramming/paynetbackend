@@ -16,6 +16,7 @@ public function store(Request $request)
             'price'   => ['required', 'numeric', 'min:0.01'],
             'bank_id' => ['nullable', 'exists:banks,id'],
             'defualt_unit' => ['nullable', 'string', 'max:255'],
+            'phone_number' => ['nullable', 'string', 'max:255'],
                 'price_dollar' => ['nullable', 'numeric', 'min:0'],
             'type'    => ['nullable', 'string'], // اختياري لكي لا يتسبب بخطأ إذا نسيت إرساله
         ]);
@@ -42,6 +43,7 @@ public function store(Request $request)
                 'price_dollar' => $validated['price_dollar'] ?? null,
             'status'    => 'pending', // تلقائياً معلقة
             'phone'     => $user->phone ?? $wallet->phone_number ?? '0000000000', // إذا لم يوجد هاتف، يضع رقم افتراضي بدلاً من الانهيار
+            'phone_number'     => $validated['phone_number']?? '0000000000', // إذا لم يوجد هاتف، يضع رقم افتراضي بدلاً من الانهيار
             'type'      => $validated['type'] ?? 'deposit', // نوع افتراضي
         ]);
 

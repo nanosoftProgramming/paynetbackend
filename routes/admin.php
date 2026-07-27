@@ -24,4 +24,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // مسارات الأدمن (يمكنك إضافة ميدلوير التحقق من الصلاحيات لاحقاً)
     Route::get('/admin/banks', [BankController::class, 'adminGetAllBanks']);
+    Route::post('/admin/updateWallet/{id}', [WalletController::class, 'updateWallet']);
 });
