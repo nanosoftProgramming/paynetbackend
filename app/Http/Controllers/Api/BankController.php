@@ -213,4 +213,56 @@ public function adminGetAllBanks(Request $request)
             return returnMessage(false, $th->getMessage(), null, 'server_error');
         }
     }
+
+
+
+    // 6. جلب كافة البنوك الخاصة بمستخدم معين للأدمن (بدون pagination)
+    public function adminGetBanksByUser(Request $request, $userId)
+    {
+        try {
+            // التحقق مما إذا كان المستخدم الحالي هو أدمن
+            if ($request->user()->role !== 'admin') {
+                return returnMessage(false, 'Unauthorized. Admin access only.', null, 'forbidden');
+            }
+
+            // البدء بالاستعلام مع جلب بيانات المستخدم الأساسية أيضاً
+            $query = Bank::where('user_id', $userId)->with('user');
+
+            // 1. نظام البحث العام (Search) ضمن بنوك هذا المستخدم
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                
+                $query->where(function ($q) use ($search) {
+                    $q->where('number', 'like', "%{$search}%")
+                      ->orWhereDate('created_at', $search);
+                });
+            }
+
+            // 2. الفلترة حسب نوع البنك (Type Filter)
+            if ($request->filled('type')) {
+                $query->where('type', $request->input('type'));
+            }
+
+            // 3. الفلترة حسب تواريخ الإنشاء
+            if ($request->filled('date')) {
+                $query->whereDate('created_at', $request->input('date'));
+            }
+
+            if ($request->filled('date_from')) {
+                $query->whereDate('created_at', '>=', $request->input('date_from'));
+            }
+            
+            if ($request->filled('date_to')) {
+                $query->whereDate('created_at', '<=', $request->input('date_to'));
+            }
+
+            // ترتيب النتائج من الأحدث للأقدم وجلب البيانات كاملة
+            $banks = $query->latest()->get();
+
+            return returnMessage(true, 'User banks fetched successfully for admin', $banks, 'success');
+
+        } catch (\Throwable $th) {
+            return returnMessage(false, $th->getMessage(), null, 'server_error');
+        }
+    }
 }
