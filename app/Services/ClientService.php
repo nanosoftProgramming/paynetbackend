@@ -15,7 +15,7 @@ class ClientService
               $Clients = Clients::query()
             ->where('role', 'user')
             ->with($relations);
-$perPage = $data['per_page'] ?? 10;
+$perPage = $data['per_page'] ?? '';
         
         return User::query()
             ->where('role', 'user')
