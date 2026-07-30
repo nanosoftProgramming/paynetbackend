@@ -15,8 +15,13 @@ class ClientService
               $Clients = Clients::query()
             ->where('role', 'user')
             ->with($relations);
-
-        return getCaseCollection($Clients, $data);
+$perPage = $data['per_page'] ?? 10;
+        
+        return User::query()
+            ->where('role', 'user')
+            ->with($relations)
+            ->paginate($perPage);
+        // return getCaseCollection($Clients, $data);
 
         // يمكنك وضع أي شروط، فلترة، أو تقسيم صفحات (Pagination) هنا
         // return User::where('role', 'user')->get();
@@ -32,10 +37,41 @@ public function toggleActivate($user, array $data = [])
 
         return $user->fresh();
     }
+// public function active(array $data, array $relations = [])
+// {
+//   $query = \App\Models\User::with($relations)->where('role', 'user');
+// $perPage = $data['per_page'] ?? 10;
+
+//     return $query->paginate($perPage);
+//     }
+
 public function active(array $data, array $relations = [])
 {
-    // استدعاء المودل وجلب البيانات (عدل حسب اسم المودل لديك مثل Client أو User)
-    return \App\Models\User::with($relations)->where('role', 'user')->get();
+    $query = \App\Models\User::with($relations)->where('role', 'user');
+
+    // تفعيل البحث بناءً على المعطيات المرسلة
+    if (!empty($data['search'])) {
+        $search = $data['search'];
+        $query->where(function ($q) use ($search) {
+            $q->where('email', 'like', "%{$search}%")
+              ->orWhere('username', 'like', "%{$search}%")
+              ->orWhere('organization_name', 'like', "%{$search}%")
+              ->orWhere('ip', 'like', "%{$search}%")
+                                    ->orWhereDate('created_at', $search)
+;
+              
+        });
+    }
+
+    if (isset($data['is_active']) && $data['is_active'] !== '') {
+        if ($data['is_active'] !== 'all') {
+            $query->where('is_active', $data['is_active']);
+        }
+    }
+
+    $perPage = $data['per_page'] ?? 10;
+
+    return $query->paginate($perPage);
 }
     /**
      * إيجاد عميل معين بواسطة الـ ID

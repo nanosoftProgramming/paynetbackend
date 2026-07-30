@@ -6,24 +6,74 @@ use Illuminate\Http\Request;
 use App\Models\Wallet;
 class WalletController extends Controller
 {
-    public function index(Request $request)
-    {
-        try {
-            // التحقق مما إذا كان المستخدم الحالي هو أدمن
-            if ($request->user()->role !== 'admin') {
-                return returnMessage(false, 'Unauthorized. Admin access only.', null, 'forbidden');
+public function index(Request $request)
+{
+    try {
+        // التحقق مما إذا كان المستخدم الحالي هو أدمن
+        if ($request->user()->role !== 'admin') {
+            return returnMessage(false, 'Unauthorized. Admin access only.', null, 'forbidden');
+        }
+
+        // 1. تعريف المتغير الأساسي
+        $query = Wallet::with('user');
+
+        // 2. البحث فقط إذا كان مُدخلاً وليس فارغاً
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhere('phone_number', 'like', "%{$search}%")
+                  ->orWhere('total_price', 'like', "%{$search}%")
+                  ->orWhere('amount', 'like', "%{$search}%")
+                  ->orWhere('price', 'like', "%{$search}%")
+                                        ->orWhereDate('created_at', $search)
+
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('username', 'like', "%{$search}%")
+                                ->orWhere('organization_name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // 3. الفلترة حسب الحالة فقط إذا تم اختيار حالة حقيقية وليست فارغة أو 'all'
+  if ($request->filled('status') && $request->input('status') !== 'all') {
+            $status = $request->input('status');
+            
+            // التأكد من أن الحالة المرسلة صحيحة ومقبولة
+            $allowedStatuses = ['pending', 'accepted', 'rejected', 'active', 'inactive'];
+            
+            if (in_array($status, $allowedStatuses)) {
+                $query->where('status', $status);
+            }
+        }
+if ($request->filled('year')) {
+                $query->whereYear('created_at', $request->input('year'));
             }
 
-            // جلب جميع المحافظ مع بيانات المستخدم المرتبط بها
-            $wallets = Wallet::with('user')->get();
+            if ($request->filled('month')) {
+                $query->whereMonth('created_at', $request->input('month'));
+            }
+            if ($request->filled('day')) {
+    // نفترض أن الصيغة المرسلة هي 'm/d/Y' أو صيغة قياسية يمكن تحويلها
+    $dateInput = $request->input('day');
+    
+    // إذا كنت ترسله بصيغة m/d/Y (مثل 7/30/2026) يمكنك تحويله إلى Y-m-d هكذا:
+    $formattedDate = date('Y-m-d', strtotime($dateInput));
 
-            // استخدام دالة returnMessage الخاصة بمشروعك (أو استبدالها بـ response()->json العادية)
-            return returnMessage(true, 'Wallets retrieved successfully', $wallets, 'success');
+    $query->whereDate('created_at', $formattedDate);
+}
+        // 4. تنفيذ الجلب مع التقسيم (Pagination)
+        $perPage = $request->input('per_page', 10);
+        $wallets = $query->paginate($perPage);
 
-        } catch (\Throwable $th) {
-            return returnMessage(false, $th->getMessage(), null, 'server_error');
-        }
+        return returnMessage(true, 'Wallets retrieved successfully', $wallets, 'success');
+
+    } catch (\Throwable $th) {
+        return returnMessage(false, $th->getMessage(), null, 'server_error');
     }
+}
     // جلب محفظة المستخدم المُسجّل حالياً
     public function myWallet(Request $request)
     {

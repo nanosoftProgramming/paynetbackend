@@ -8,22 +8,95 @@ use Illuminate\Support\Facades\DB; // <-- أضف هذا السطر الضرور�
 use Illuminate\Http\Request;
 class UserTransactionController extends Controller
 {
+// public function myTransactions(Request $request)
+//     {
+//         // 1. جلب ID المستخدم الحالي المسجل الدخول عبر التوكن
+//         $userId = $request->user()->id; // أو استخدام auth()->id()
+
+//         // 2. جلب المعاملات الخاصة بهذا المستخدم فقط مع بيانات المحفظة
+//         $transactions = Transaction::with(['wallet', 'bank'])
+//             ->where('user_id', $userId)
+//             ->latest()
+//             ->get();
+
+//         return response()->json([
+//             'status' => true,
+//             'message' => 'Your transactions retrieved successfully.',
+//             'data' => $transactions
+//         ], 200);
+//     }
+
 public function myTransactions(Request $request)
     {
-        // 1. جلب ID المستخدم الحالي المسجل الدخول عبر التوكن
-        $userId = $request->user()->id; // أو استخدام auth()->id()
+        try {
+            // 1. جلب ID المستخدم الحالي المسجل الدخول عبر التوكن
+            $userId = $request->user()->id;
 
-        // 2. جلب المعاملات الخاصة بهذا المستخدم فقط مع بيانات المحفظة
-        $transactions = Transaction::with(['wallet', 'bank'])
-            ->where('user_id', $userId)
-            ->latest()
-            ->get();
+            // 2. البدء بالاستعلام وحصر المعاملات للمستخدم الحالي فقط مع جلب العلاقات
+            $query = Transaction::with(['wallet', 'bank'])
+                ->where('user_id', $userId)
+                ->latest();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Your transactions retrieved successfully.',
-            'data' => $transactions
-        ], 200);
+            // 3. الفلترة حسب الحالة (status)
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
+            }
+
+            // 4. نظام البحث الشامل (Search)
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+
+                $query->where(function ($q) use ($search) {
+                    // البحث في جدول المعاملات (Transactions) الخاصة به
+                    $q->where('phone', 'like', "%{$search}%")
+                      ->orWhere('phone_number', 'like', "%{$search}%")
+                      ->orWhere('type', 'like', "%{$search}%")
+                      ->orWhere('price', 'like', "%{$search}%")
+                      ->orWhere('price_dollar', 'like', "%{$search}%")
+                      ->orWhereDate('created_at', $search)
+                      
+                      // البحث في جدول البنوك المرتبط (Bank)
+                      ->orWhereHas('bank', function ($bankQuery) use ($search) {
+                          $bankQuery->where('number', 'like', "%{$search}%");
+                      })
+                      
+                      // البحث في جدول المحافظ المرتبط (Wallet) إن وجد
+                      ->orWhereHas('wallet', function ($walletQuery) use ($search) {
+                          $walletQuery->where('phone_number', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            // 5. الفلترة حسب التاريخ (Date Filters)
+            if ($request->filled('date')) {
+                $query->whereDate('created_at', $request->input('date'));
+            }
+            if ($request->filled('date_from')) {
+                $query->whereDate('created_at', '>=', $request->input('date_from'));
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('created_at', '<=', $request->input('date_to'));
+            }
+
+                if ($request->filled('type') && $request->input('type') !== 'all') {
+        $query->where('type', $request->input('type'));
+    }
+            // 6. التقسيم (Pagination) - الافتراضي 15 عنصر لكل صفحة
+            $perPage = $request->input('per_page', 15);
+            $transactions = $query->paginate($perPage);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Your transactions retrieved successfully.',
+                'data' => $transactions
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     public function updateTransactionStatus(Request $request, $id)

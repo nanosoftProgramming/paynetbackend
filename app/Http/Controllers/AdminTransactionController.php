@@ -52,16 +52,81 @@ public function store(Request $request)
             'data'    => $transaction
         ], 201);
     }
-    public function index(Request $request)
-    {
-        // جلب المعاملات مع بيانات المستخدم والمحفظة المرتبطة بها، وترتيبها من الأحدث للأقدم
-$transactions = Transaction::with(['user', 'wallet', 'bank'])
-                ->latest()
-                ->paginate(15);
-        return response()->json([
-            'status' => true,
-            'message' => 'Transactions retrieved successfully.',
-            'data' => $transactions
-        ], 200);
+public function index(Request $request)
+{
+    // البدء بالاستعلام مع جلب العلاقات وترتيبها من الأحدث للأقدم
+    $query = Transaction::with(['user', 'wallet', 'bank'])->latest();
+
+    // 1. الفلترة حسب الحالة (status)
+    if ($request->filled('status')) {
+        $query->where('status', $request->input('status'));
     }
+
+    // 2. الفلترة حسب النوع (type)
+    if ($request->filled('type') && $request->input('type') !== 'all') {
+        $query->where('type', $request->input('type'));
+    }
+
+    // 3. الفلترة حسب السنة (Year) - تم إصلاحها وتأكيدها هنا
+    if ($request->filled('year')) {
+        $year = $request->input('year');
+        if (is_numeric($year)) {
+            $query->whereYear('created_at', $year);
+        }
+    }
+
+    // 4. الفلترة حسب الشهر (Month)
+    if ($request->filled('month')) {
+        $query->whereMonth('created_at', $request->input('month'));
+    }
+
+    // 5. الفلترة حسب اليوم (Day)
+    if ($request->filled('day')) {
+        $dateInput = $request->input('day');
+        $formattedDate = date('Y-m-d', strtotime($dateInput));
+        $query->whereDate('created_at', $formattedDate);
+    }
+
+    // 6. نظام البحث الشامل (Search)
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+
+        $query->where(function ($q) use ($search) {
+            $q->where('phone', 'like', "%{$search}%")
+              ->orWhere('phone_number', 'like', "%{$search}%")
+              ->orWhere('type', 'like', "%{$search}%")
+              ->orWhere('price', 'like', "%{$search}%")
+              ->orWhereDate('created_at', $search)
+              ->orWhereHas('user', function ($userQuery) use ($search) {
+                  $userQuery->where('username', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+              })
+              ->orWhereHas('bank', function ($bankQuery) use ($search) {
+                  $bankQuery->where('number', 'like', "%{$search}%");
+              });
+        });
+    }
+
+    // 7. التقسيم (Pagination) - تم ضبط القيمة الافتراضية إلى 10 بدلاً من 1 لتجربة مستخدم أفضل
+    $perPage = $request->input('per_page', 10);
+    $transactions = $query->paginate($perPage);
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Transactions retrieved successfully.',
+        'data' => $transactions
+    ], 200);
+}
+//     public function index(Request $request)
+//     {
+//         // جلب المعاملات مع بيانات المستخدم والمحفظة المرتبطة بها، وترتيبها من الأحدث للأقدم
+// $transactions = Transaction::with(['user', 'wallet', 'bank'])
+//                 ->latest()
+//                 ->paginate(15);
+//         return response()->json([
+//             'status' => true,
+//             'message' => 'Transactions retrieved successfully.',
+//             'data' => $transactions
+//         ], 200);
+//     }
 }
