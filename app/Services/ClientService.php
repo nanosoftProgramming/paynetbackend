@@ -69,7 +69,7 @@ public function active(array $data, array $relations = [])
         }
     }
 
-    $perPage = $data['per_page'] ?? 10;
+    $perPage = $data['per_page'] ??"";
 
     return $query->paginate($perPage);
 }
