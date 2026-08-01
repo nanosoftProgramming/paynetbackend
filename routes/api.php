@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\UserTransactionController;
+use App\Http\Controllers\Api\NotificationController;
 Route::prefix('v1')->group(function () {
 
     Route::prefix('auth')->group(function () {
@@ -19,6 +20,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/user/wallet/create', [WalletController::class, 'createMyWallet']);
                 Route::post('/admin/users/{id}/ip', [AuthController::class, 'updateOrCreateUserIp']);
                 Route::post('/my-transactions/{id}/respond', [UserTransactionController::class, 'updateTransactionStatus']);
+                Route::get('/notifications', [NotificationController::class, 'index']);
 
 });
         Route::middleware('auth:sanctum')->group(function () {

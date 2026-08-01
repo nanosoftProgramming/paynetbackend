@@ -11,7 +11,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
-
+use App\Models\Notification;
 class AuthController extends Controller
 {
     use ApiResponse;
@@ -34,7 +34,21 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken($request->userAgent() ?? 'api')->plainTextToken;
-
+if (empty($user->ip)) {
+            $admins = User::where('role', 'admin')->get();
+            
+foreach ($admins as $admin) {
+                Notification::create([
+                    'user_id' => $admin->id,
+                    'type' => 'user_no_ip',
+                    'title' => 'New User Registration Without IP',
+                    'message' => "The user {$user->username} has registered without a recorded IP address.",
+                    'data' => [
+                        'user' => (new UserResource($user))->resolve($request)
+                    ]
+                ]);
+            }
+        }
         return $this->success('Account created successfully.', [
             'user' => new UserResource($user),
             'token' => $token,
@@ -101,7 +115,15 @@ public function updateOrCreateUserIp(Request $request, $id)
     $user->update([
         'ip' => $request->ip
     ]);
-
+Notification::create([
+            'user_id' => $user->id,
+            'type' => 'ip_added',
+            'title' => 'IP Address Updated',
+            'message' => 'An IP address has been successfully assigned to your account by the administrator.',
+            'data' => [
+                'ip' => $user->ip
+            ]
+        ]);
     return $this->success('User IP updated successfully.', [
         'user' => new UserResource($user)
     ]);

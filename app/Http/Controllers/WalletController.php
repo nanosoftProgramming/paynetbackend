@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Wallet;
+use App\Models\Notification;
+use App\Models\User;
+use App\Http\Resources\UserResource;
+
 class WalletController extends Controller
 {
 public function index(Request $request)
@@ -96,12 +100,12 @@ public function createMyWallet(Request $request)
         try {
             $userId = $request->user()->id;
 
-            // التحقق مما إذا كانت المحفظة موجودة مسبقاً
-            $wallet = Wallet::where('user_id', $userId)->first();
+            // // التحقق مما إذا كانت المحفظة موجودة مسبقاً
+            // $wallet = Wallet::where('user_id', $userId)->first();
 
-            if ($wallet) {
-                return returnMessage(false, 'User already has a wallet', $wallet, 'bad_request');
-            }
+            // if ($wallet) {
+            //     return returnMessage(false, 'User already has a wallet', $wallet, 'bad_request');
+            // }
 
             // التحقق من صحة البيانات واستقبال العملة كنص
             $request->validate([
@@ -119,9 +123,11 @@ public function createMyWallet(Request $request)
             ]);
 
             // إنشاء المحفظة مع حفظ العملة كنص في البداية
-            $wallet = Wallet::create([
-                'currency'     => $request->currency, // <--- حفظ اسم العملة كنص (مثال: USD أو EGP)
-                'user_id'      => $userId,
+            $wallet = Wallet::updateOrCreate(
+['user_id' => $userId], // شرط البحث (إذا وجد هذا المستخدم)
+            [
+                              'currency'     => $request->currency, // <--- حفظ اسم العملة كنص (مثال: USD أو EGP)
+                // 'user_id'      => $userId,
                 'phone_number' => $request->phone_number,
                 'total_price'  => $request->total_price ?? 0.00,
                 'balance'      => 0.00,
@@ -133,6 +139,22 @@ public function createMyWallet(Request $request)
                 // 'amount_dollar'            => $validated['amount_dollar'] ?? null,
                 // 'defualt_unit_amount'      => $validated['defualt_unit_amount'] ?? null,
             ]);
+            $admins = User::where('role', 'admin')->get();
+        
+foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'type' => 'wallet_pending',
+                'title' => 'New Wallet Request',
+                'message' => "The client {$request->user()->username} has added a new wallet pending approval.",
+                'data' => [
+'user' => (new UserResource($request->user()))->resolve($request),
+                    
+                    // إرجاع تفاصيل المحفظة كامولة (مع تحويلها لـ Array)
+                    'wallet' => $wallet->toArray(),                ]
+            ]);
+        }
+
 
             return returnMessage(true, 'Wallet created successfully', $wallet, 'success');
 
@@ -191,7 +213,17 @@ public function updateWallet(Request $request, $id)
                 $wallet->defualt_unit = $request->defualt_unit;
             }
             $wallet->save();
+Notification::create([
+            'user_id' => $wallet->user_id,
+            'type' =>  $request->status,
+            'title' => 'Wallet Approved',
+'message' => 'Your wallet request has been ' . $request->status . ' by the admin.',       
 
+            'data' => [
+                'wallet_id' => $wallet->id,
+                'wallet' => $wallet->toArray()
+            ]
+        ]);
             return returnMessage(true, 'Wallet updated successfully', $wallet, 'success');
 
         } catch (\Throwable $th) {
@@ -247,7 +279,15 @@ public function updateWallet(Request $request, $id)
             }
 
             $wallet->save();
-
+Notification::create([
+            'user_id' => $wallet->user_id,
+            'type' =>  'status state',
+            'title' => 'Wallet Approved',
+'message' => 'Your wallet request has been ' . $request->status . ' by the admin.',            'data' => [
+                'wallet_id' => $wallet->id,
+                'wallet' => $wallet->toArray()
+            ]
+        ]);
             return returnMessage(true, 'Wallet updated successfully', $wallet, 'success');
 
         } catch (\Throwable $th) {

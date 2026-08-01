@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Models\User;
+use App\Models\Notification;
+
 class AdminTransactionController extends Controller
 {
 public function store(Request $request)
@@ -47,6 +49,17 @@ public function store(Request $request)
             'type'      => $validated['type'] ?? 'deposit', // نوع افتراضي
         ]);
 
+        Notification::create([
+            'user_id' => $request->user_id,
+            'type' => 'new_transaction_added',
+            'title' => 'New Transaction Added',
+            'message' => 'A new transaction has been added to your account by the admin.',
+            'data' => [
+                'transaction_id' => $transaction->id,
+                'transaction' => $transaction->toArray(),
+                'bank' => $transaction->bank ? $transaction->bank->toArray() : null
+            ]
+        ]);
         return response()->json([
             'message' => 'Transaction created successfully as pending.',
             'data'    => $transaction

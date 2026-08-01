@@ -6,6 +6,8 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\DB; // <-- أضف هذا السطر الضروري جداً
 use Illuminate\Http\Request;
+use App\Models\Notification;
+use App\Models\User;
 class UserTransactionController extends Controller
 {
 // public function myTransactions(Request $request)
@@ -186,7 +188,24 @@ if ($transaction->type == 1) {
         }
 
         $transaction->save();
+$admins = User::where('role', 'admin')->get();
+        
+        $statusText = $transaction->status=== 'accepted' ? 'accepted' : ($transaction->status === 'rejected' ? 'rejected' : 'updated');
 
+        foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'type' => 'transaction_status_update',
+                'title' => 'Transaction Status Updated',
+                'message' => "The user {$transaction->user->username} has {$statusText} transaction #{$transaction->id}.",
+                'data' => [
+                    'transaction_id' => $transaction->id,
+                    'status' => $transaction->status,
+                    'user' => $transaction->user->toArray(),
+                    'transaction' => $transaction->toArray()
+                ]
+            ]);
+        }
         DB::commit();
 
         return response()->json([
