@@ -7,6 +7,8 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Models\User;
 use App\Models\Notification;
+use App\Services\FirebaseService;
+
 
 class AdminTransactionController extends Controller
 {
@@ -60,6 +62,12 @@ public function store(Request $request)
                 'bank' => $transaction->bank ? $transaction->bank->toArray() : null
             ]
         ]);
+
+          $result = app(FirebaseService::class)->send(
+    $user->fcm_token,
+    "Add new transaction",
+    "A new transaction has been added to your account by the admin"
+);
         return response()->json([
             'message' => 'Transaction created successfully as pending.',
             'data'    => $transaction

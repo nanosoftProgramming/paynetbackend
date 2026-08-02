@@ -13,7 +13,7 @@ class FirebaseService
     public function __construct()
     {
         $factory = (new Factory)
-            ->withServiceAccount(storage_path('app/firebase/paynet-d89d4-firebase-adminsdk-fbsvc-426aa58d08.json'));
+            ->withServiceAccount(storage_path('app/firebase/paynet-d89d4-firebase-adminsdk-fbsvc-84848cc37d.json'));
 
         $this->messaging = $factory->createMessaging();
     }

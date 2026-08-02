@@ -139,22 +139,29 @@ public function createMyWallet(Request $request)
                 // 'amount_dollar'            => $validated['amount_dollar'] ?? null,
                 // 'defualt_unit_amount'      => $validated['defualt_unit_amount'] ?? null,
             ]);
-            $admins = User::where('role', 'admin')->get();
-        
-foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'type' => 'wallet_pending',
-                'title' => 'New Wallet Request',
-                'message' => "The client {$request->user()->username} has added a new wallet pending approval.",
-                'data' => [
-'user' => (new UserResource($request->user()))->resolve($request),
-                    
-                    // إرجاع تفاصيل المحفظة كامولة (مع تحويلها لـ Array)
-                    'wallet' => $wallet->toArray(),                ]
-            ]);
-        }
+  $admins = User::where('role', 'admin')->get();
 
+foreach ($admins as $admin) {
+
+    Notification::create([
+        'user_id' => $admin->id,
+        'type' => 'wallet_pending',
+        'title' => 'New Wallet Request',
+        'message' => "The client {$request->user()->username} has added a new wallet pending approval.",
+        'data' => [
+            'user' => (new UserResource($request->user()))->resolve($request),
+            'wallet' => $wallet->toArray(),
+        ]
+    ]);
+
+    if (!empty($admin->fcm_token)) {
+        app(FirebaseService::class)->send(
+            $admin->fcm_token,
+            "Wallet request",
+            "The client {$request->user()->username} has added a new wallet pending approval."
+        );
+    }
+}
 
             return returnMessage(true, 'Wallet created successfully', $wallet, 'success');
 
@@ -224,6 +231,14 @@ Notification::create([
                 'wallet' => $wallet->toArray()
             ]
         ]);
+        $user = \App\Models\User::find($wallet->user_id);
+  $result = app(FirebaseService::class)->send(
+    $user->fcm_token,
+    "Wallet state",
+   'Your wallet request has been ' . $request->status . ' by the admin.'
+
+);
+
             return returnMessage(true, 'Wallet updated successfully', $wallet, 'success');
 
         } catch (\Throwable $th) {
@@ -291,11 +306,12 @@ Notification::create([
         ]);
         
 $user = \App\Models\User::find($wallet->user_id);
-app(FirebaseService::class)->send(
+  $result = app(FirebaseService::class)->send(
     $user->fcm_token,
-    "عميل جديد",
-    "تم تسجيل عميل جديد في النظام"
+    "Wallet state",
+    'Your wallet request has been ' . $request->status . ' by the admin.'
 );
+
 
 
             return returnMessage(true, 'Wallet updated successfully', $wallet, 'success');

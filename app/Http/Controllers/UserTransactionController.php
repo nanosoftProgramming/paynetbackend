@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB; // <-- أضف هذا السطر الضرور�
 use Illuminate\Http\Request;
 use App\Models\Notification;
 use App\Models\User;
+use App\Services\FirebaseService;
+
 class UserTransactionController extends Controller
 {
 // public function myTransactions(Request $request)
@@ -191,21 +193,56 @@ if ($transaction->type == 1) {
 $admins = User::where('role', 'admin')->get();
         
         $statusText = $transaction->status=== 'accepted' ? 'accepted' : ($transaction->status === 'rejected' ? 'rejected' : 'updated');
+foreach ($admins as $admin) {
 
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'type' => 'transaction_status_update',
-                'title' => 'Transaction Status Updated',
-                'message' => "The user {$transaction->user->username} has {$statusText} transaction #{$transaction->id}.",
-                'data' => [
-                    'transaction_id' => $transaction->id,
-                    'status' => $transaction->status,
-                    'user' => $transaction->user->toArray(),
-                    'transaction' => $transaction->toArray()
-                ]
+    Notification::create([
+        'user_id' => $admin->id,
+        'type' => 'transaction_status_update',
+        'title' => 'Transaction Status Updated',
+        'message' => "The user {$transaction->user->username} has {$statusText} transaction #{$transaction->id}.",
+        'data' => [
+            'transaction_id' => $transaction->id,
+            'status' => $transaction->status,
+            'user' => $transaction->user->toArray(),
+            'transaction' => $transaction->toArray(),
+        ]
+    ]);
+
+    if (!empty($admin->fcm_token)) {
+        try {
+            app(FirebaseService::class)->send(
+                $admin->fcm_token,
+                "Transaction state",
+                "The user {$transaction->user->username} has {$statusText} transaction #{$transaction->id}."
+            );
+        } catch (\Throwable $e) {
+            \Log::error('FCM Error', [
+                'admin_id' => $admin->id,
+                'token' => $admin->fcm_token,
+                'error' => $e->getMessage(),
             ]);
         }
+    }
+}
+//         foreach ($admins as $admin) {
+//             Notification::create([
+//                 'user_id' => $admin->id,
+//                 'type' => 'transaction_status_update',
+//                 'title' => 'Transaction Status Updated',
+//                 'message' => "The user {$transaction->user->username} has {$statusText} transaction #{$transaction->id}.",
+//                 'data' => [
+//                     'transaction_id' => $transaction->id,
+//                     'status' => $transaction->status,
+//                     'user' => $transaction->user->toArray(),
+//                     'transaction' => $transaction->toArray()
+//                 ]
+//             ]);
+//         }
+//   $result = app(FirebaseService::class)->send(
+//     $admin->fcm_token,
+//     "حالة التحويل",
+//     "تم {$transaction->status} التحويل"
+// );
         DB::commit();
 
         return response()->json([

@@ -7,6 +7,8 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\FirebaseService;
+
 use App\Models\Notification;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
@@ -47,18 +49,43 @@ class AuthController extends Controller
 
         if (empty($user->ip)) {
             $admins = User::where('role', 'admin')->get();
-            
             foreach ($admins as $admin) {
-                Notification::create([
-                    'user_id' => $admin->id,
-                    'type' => 'user_no_ip',
-                    'title' => 'New User Registration Without IP',
-                    'message' => "The user {$user->username} has registered without a recorded IP address.",
-                    'data' => [
-                        'user' => (new UserResource($user))->resolve($request)
-                    ]
-                ]);
-            }
+
+    Notification::create([
+        'user_id' => $admin->id,
+        'type' => 'user_no_ip',
+        'title' => 'New User Registration Without IP',
+        'message' => "The user {$user->username} has registered without a recorded IP address.",
+        'data' => [
+            'user' => (new UserResource($user))->resolve($request)
+        ]
+    ]);
+
+    if (!empty($admin->fcm_token)) {
+        app(FirebaseService::class)->send(
+            $admin->fcm_token,
+            "New Client",
+            "New User Registration Without IP"
+        );
+    }
+}
+//             foreach ($admins as $admin) {
+//                 Notification::create([
+//                     'user_id' => $admin->id,
+//                     'type' => 'user_no_ip',
+//                     'title' => 'New User Registration Without IP',
+//                     'message' => "The user {$user->username} has registered without a recorded IP address.",
+//                     'data' => [
+//                         'user' => (new UserResource($user))->resolve($request)
+//                     ]
+//                 ]);
+//   $result = app(FirebaseService::class)->send(
+//     $admins->fcm_token,
+//     "New Client",
+//     "New User Registration Without IP"
+// );
+
+//             }
         }
 
         return $this->success('Account created successfully.', [
@@ -251,6 +278,7 @@ public function forgotPassword(Request $request)
             'ip' => $request->ip
         ]);
 
+
         Notification::create([
             'user_id' => $user->id,
             'type' => 'ip_added',
@@ -260,6 +288,11 @@ public function forgotPassword(Request $request)
                 'ip' => $user->ip
             ]
         ]);
+                app(FirebaseService::class)->send(
+            $user->fcm_token,
+            "IP added",
+            "An IP address has been successfully assigned to your account by the administrator."
+        );
 
         return $this->success('User IP updated successfully.', [
             'user' => new UserResource($user)
