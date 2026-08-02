@@ -12,7 +12,10 @@ Route::prefix('v1')->group(function () {
         Route::middleware('throttle:6,1')->group(function () {
             Route::post('register', [AuthController::class, 'register']);
             Route::post('login', [AuthController::class, 'login']);
-            
+            Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+
+// 2. استقبال التوكن وكلمة المرور الجديدة لتحديثها
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
         });
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/wallet', [WalletController::class, 'myWallet']);
@@ -29,7 +32,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('logout-all', [AuthController::class, 'logoutAll']);
             Route::post('update-profile', [AuthController::class, 'updateProfile']);
             Route::post('change-password', [AuthController::class, 'changePassword']);
-        });
+                    });
     });
+
 
 });

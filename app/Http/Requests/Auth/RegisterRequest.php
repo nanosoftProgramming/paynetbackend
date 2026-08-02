@@ -29,6 +29,8 @@ class RegisterRequest extends FormRequest
             'role' => ['sometimes', 'string', 'in:admin,user,manager'], // حدد القيم المسموح بها حسب نظامك
             'organization_name' => ['required', 'string', 'min:2', 'max:255'],
             'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
+                    'fcm_token' => 'nullable|string',
+
         ];
     }
 

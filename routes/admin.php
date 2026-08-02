@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\AdminTransactionController;
 use App\Http\Controllers\Api\BankController;
+use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\NotificationController;
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/admin/clients', [AdminClientsController::class, 'index']);
@@ -28,4 +29,5 @@ Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/admin/banks', [BankController::class, 'adminGetAllBanks']);
     Route::post('/admin/updateWallet/{id}', [WalletController::class, 'updateWallet']);
     Route::post('/notifications/{id}', [NotificationController::class, 'destroy']);
+    Route::post('/admin/users/{id}', [AuthController::class, 'deleteUserByAdmin']);
 });

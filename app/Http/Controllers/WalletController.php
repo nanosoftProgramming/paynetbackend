@@ -7,7 +7,7 @@ use App\Models\Wallet;
 use App\Models\Notification;
 use App\Models\User;
 use App\Http\Resources\UserResource;
-
+use App\Services\FirebaseService;
 class WalletController extends Controller
 {
 public function index(Request $request)
@@ -283,11 +283,21 @@ Notification::create([
             'user_id' => $wallet->user_id,
             'type' =>  'status state',
             'title' => 'Wallet Approved',
-'message' => 'Your wallet request has been ' . $request->status . ' by the admin.',            'data' => [
+'message' => 'Your wallet request has been ' . $request->status . ' by the admin.',       
+     'data' => [
                 'wallet_id' => $wallet->id,
                 'wallet' => $wallet->toArray()
             ]
         ]);
+        
+$user = \App\Models\User::find($wallet->user_id);
+app(FirebaseService::class)->send(
+    $user->fcm_token,
+    "عميل جديد",
+    "تم تسجيل عميل جديد في النظام"
+);
+
+
             return returnMessage(true, 'Wallet updated successfully', $wallet, 'success');
 
         } catch (\Throwable $th) {
