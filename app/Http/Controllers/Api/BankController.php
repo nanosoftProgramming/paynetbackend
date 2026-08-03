@@ -35,7 +35,7 @@ class BankController extends Controller
                 
                 $query->where(function ($q) use ($search) {
                     $q->where('number', 'like', "%{$search}%")
-                                                        ->orWhereDate('created_at', $search);
+      ->orWhereDate('created_at', $search);
 
 
                     
